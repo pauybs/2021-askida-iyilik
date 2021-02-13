@@ -14,7 +14,12 @@ import 'package:flutter/rendering.dart';
 
 class Akureyri extends StatefulWidget {
   Akureyri(
-      {Key key, this.title, this.subtitle, this.companyName, this.productPiece, this.idd})
+      {Key key,
+      this.title,
+      this.subtitle,
+      this.companyName,
+      this.productPiece,
+      this.idd})
       : super(key: key);
   final String title;
   final String subtitle;
@@ -30,19 +35,20 @@ class _AkureyriState extends State<Akureyri> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _firebaseStorage = FirebaseStorage.instance;
-  Image  i;
+  Image i;
   String companyName;
   String productName;
   String aciklama;
   String adres;
   bool _isLoading = false;
+  int uid;
   final FirebaseDatabase db = FirebaseDatabase();
   @override
   Widget build(BuildContext context) {
-
     String adet = widget.productPiece + " Adet " + widget.subtitle;
     aciklamaDetay();
     adresDetay();
+    idAl();
     return LoadingOverlay(
         isLoading: _isLoading,
         child: Scaffold(
@@ -54,10 +60,25 @@ class _AkureyriState extends State<Akureyri> {
                 Stack(
                   children: <Widget>[
                     SizedBox(
-                        child: Image.asset(
-                      'assets/company1.jpeg',
-                      width: 600,
-                      height: 240,
+                        child: FutureBuilder(
+                      future: _getImage(context, uid.toString() + "/a"),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          return Container(
+                            width: MediaQuery.of(context).size.width / 1.2,
+                            height: MediaQuery.of(context).size.width / 1.2,
+                            child: snapshot.data,
+                          );
+                        }
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Container(
+                            width: MediaQuery.of(context).size.width / 1.2,
+                            height: MediaQuery.of(context).size.width / 1.2,
+                            child: snapshot.data,
+                          );
+                        }
+                      },
                     )),
                     Padding(
                       padding: EdgeInsets.only(top: 270, left: 20, right: 20),
@@ -152,8 +173,7 @@ class _AkureyriState extends State<Akureyri> {
                         fontFamily: 'ConcertOne-Regular'),
                   ),
                 ),
-                adress_donate(
-                    adres),
+                adress_donate(adres),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
@@ -207,6 +227,32 @@ class _AkureyriState extends State<Akureyri> {
             )));
   }
 
+  Future<Widget> _getImage(BuildContext context, String imageName) async {
+    Image image;
+    await FireStorageService.loadImage(context, imageName).then((value) {
+      image = Image.network(
+        value.toString(),
+        fit: BoxFit.scaleDown,
+      );
+    });
+    return image;
+  }
+
+  idAl() async {
+    int uid;
+    FirebaseFirestore.instance
+        .collection('corpCode')
+        .doc(widget.companyName)
+        .get()
+        .then((value) {
+      setState(() {
+        uid = value.data()['id'];
+      });
+    });
+
+    return uid;
+  }
+
   _launchURL() async {
     const url = 'https://goo.gl/maps/8koBwKUMEBRaHw9q8';
     if (await canLaunch(url)) {
@@ -220,8 +266,8 @@ class _AkureyriState extends State<Akureyri> {
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => DonateConfirm(
-                id: widget.idd, companyName1: widget.title)));
+            builder: (context) =>
+                DonateConfirm(id: widget.idd, companyName1: widget.title)));
   }
 
   Future<void> downloadURLExample() async {
@@ -236,10 +282,9 @@ class _AkureyriState extends State<Akureyri> {
       setState(() {
         url = firestoreInfo["imgUrl"];
       });
-
     });
 
-   return Image.network(url);
+    return Image.network(url);
 
     // Within your widgets:
     // Image.network(downloadURL);
@@ -256,10 +301,6 @@ class _AkureyriState extends State<Akureyri> {
       });
     });
   }
-
-
-
-
 
   adresDetay() {
     FirebaseFirestore.instance
@@ -288,4 +329,11 @@ Widget adress_donate(
       ],
     ),
   );
+}
+
+class FireStorageService extends ChangeNotifier {
+  FireStorageService();
+  static Future<dynamic> loadImage(BuildContext context, String Image) async {
+    return await FirebaseStorage.instance.ref().child(Image).getDownloadURL();
+  }
 }

@@ -182,7 +182,7 @@ class corporateScreen extends State<CorporateCode> {
         FirebaseFirestore.instance
             .collection("corpCode")
             .doc(cn)
-            .update({'kod': t1.text = randomAlphaNumeric(6)});
+            .set({'kod': t1.text = _auth.currentUser.uid});
       });
     });
   }
@@ -237,11 +237,8 @@ class corporateScreen extends State<CorporateCode> {
     setState(() {
       yuklenecekDosya = File(alinanDosya.path);
     });
-    Reference refStorage = FirebaseStorage.instance
-        .ref()
-        .child("isyeriresimleri")
-        .child(_auth.currentUser.uid)
-        .child("isyeriResmi.png");
+    Reference refStorage =
+        FirebaseStorage.instance.ref().child(_auth.currentUser.uid).child("a");
 
     UploadTask yukleme = refStorage.putFile(yuklenecekDosya);
     String url = await (await yukleme).ref.getDownloadURL();
@@ -262,15 +259,12 @@ class corporateScreen extends State<CorporateCode> {
       Map<String, dynamic> firestoreInfo = documentSnapshot.data();
 
       setState(() {
-          companyName = firestoreInfo["companyName"];
+        companyName = firestoreInfo["companyName"];
       });
       FirebaseFirestore.instance
           .collection("corpCode")
           .doc(companyName)
           .update({'imgUrl': url});
-
-
     });
-
   }
 }
