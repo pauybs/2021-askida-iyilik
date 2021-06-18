@@ -1,9 +1,3 @@
-# 2021-askida-iyilik
-
-Doğan KISA 16219031
-Hatice SARI 18219505
-Mehtap GÜLTEN 18219603
-
 Osmanlı döneminden günümüze kadar uzanan askıda yardımlaşma kültürünün, bugün 
 
 yeteri kadar bilinmediği ve yaygınlaşmamış olduğu gözlenmiştir. Projemiz toplumu bu konuda 
@@ -49,4 +43,3 @@ uygulama sayesinde ihtiyaçları kolayca karşılanabilecektir. İyilik Askısı
 gelişen teknolojinin her türlü imkanlarından faydalanarak, bu sıkıntıların giderilmesi 
 
 amaçlanmıştır 
-
